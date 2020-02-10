@@ -24,8 +24,21 @@ daijin_level1 = 0
 global daijin_level2
 daijin_level2 = 0
 
-ser = serial.Serial('/dev/ttyUSB0', 4800, timeout=1)
-# print (ser.name)
+# Open serial connection
+serial_connected = 1
+try:
+  ser_device = '/dev/ttyUSB0'
+  ser = serial.Serial(ser_device, 4800, timeout=1)
+except:
+  serial_connected = 0
+  print ('/dev/ttyUSB0 did not work, trying /dev/ttyUSB1')
+if serial_connected == 0:
+  try:
+    ser_device = '/dev/ttyUSB1'
+    ser = serial.Serial(ser_device, 4800, timeout=1)
+  except:
+    print ('serial did not work')
+    raise
 
 def poll_level():
     packet = bytearray()
