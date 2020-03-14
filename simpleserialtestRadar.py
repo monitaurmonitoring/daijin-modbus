@@ -28,14 +28,14 @@ daijin_level2 = 0
 serial_connected = 1
 try:
   ser_device = '/dev/ttyUSB0'
-  ser = serial.Serial(ser_device, 4800, timeout=1)
+  ser = serial.Serial(ser_device, 9600, timeout=1)
 except:
   serial_connected = 0
   print ('/dev/ttyUSB0 did not work, trying /dev/ttyUSB1')
 if serial_connected == 0:
   try:
     ser_device = '/dev/ttyUSB1'
-    ser = serial.Serial(ser_device, 4800, timeout=1)
+    ser = serial.Serial(ser_device, 9600, timeout=1)
   except:
     print ('serial did not work')
     raise
@@ -44,7 +44,9 @@ def poll_level():
     packet = bytearray()
     packet.append(0x01)
     packet.append(0x03)
+    packet.append(0x00)
     packet.append(0x02)
+    packet.append(0x00)
     packet.append(0x02)
     packet.append(0x65)
     packet.append(0xcb)
@@ -52,11 +54,11 @@ def poll_level():
     ser.write(packet)
     s = ser.read(100).hex()
     print ("The raw level return from the instrument is: ", s)
-    data_extract = s[6:14]
+    data_extract = s[22:30]
     ser.close
     print ("The extracted level data is: ", data_extract)
-    print ("The converted level float is: ", convert(data_extract))
-    print ("The int converted level float is: ", int_convert(data_extract))
+    print ("The converted level data is: ", convert(data_extract))
+    print ("The int converted level data is: ", int_convert(data_extract))
     global daijin_level1
     daijin_level1 = convert(data_extract)
 
@@ -64,7 +66,9 @@ def poll_level2():
     packet = bytearray()
     packet.append(0x01)
     packet.append(0x03)
+    packet.append(0x00)
     packet.append(0x03)
+    packet.append(0x00)
     packet.append(0x02)
     packet.append(0x34)
     packet.append(0x0b)
@@ -72,18 +76,21 @@ def poll_level2():
     ser.write(packet)
     s = ser.read(100).hex()
     print ("The raw level2 return from the instrument is: ", s)
-    data_extract = s[6:14]
+    #data_extract = s[6:12]
+    data_extract = s[22:30]
     global daijin_level2
     daijin_level2 = int_convert(data_extract)
     print ("The extracted level2 data is: ", data_extract)
     print ("The converted level2 float is: ", convert(data_extract))
-    print ("The int converted level2 float is: ", int_convert(data_extract))
+    print ("The int converted level2 data is: ", int_convert(data_extract))
     ser.close
 
 def poll_distance():
     packet = bytearray()
     packet.append(0x01)
     packet.append(0x03)
+    packet.append(0x00)
+    packet.append(0x00)
     packet.append(0x00)
     packet.append(0x02)
     packet.append(0xC4)
@@ -92,19 +99,22 @@ def poll_distance():
     ser.write(packet)
     s = ser.read(100).hex()
     print ("The raw distance return from the instrument is: ", s)
-    data_extract = s[6:14]
+    #data_extract = s[6:12]
+    data_extract = s[22:30]
     global daijin_distance1
     daijin_distance1 = int_convert(data_extract)
     print ("The extracted distance data is: ", data_extract)
     print ("The converted distance float is: ", convert(data_extract))
-    print ("The int converted distance float is: ", int_convert(data_extract))
+    print ("The int converted distance data is: ", int_convert(data_extract))
     ser.close
 
 def poll_distance2():
     packet = bytearray()
     packet.append(0x01)
     packet.append(0x03)
+    packet.append(0x00)
     packet.append(0x01)
+    packet.append(0x00)
     packet.append(0x02)
     packet.append(0x95)
     packet.append(0xcb)
@@ -112,29 +122,34 @@ def poll_distance2():
     ser.write(packet)
     s = ser.read(100).hex()
     global daijin_distance2
+    #data_extract = s[6:12]
+    data_extract = s[22:30]
     daijin_distance2 = int_convert(data_extract)
     print ("The raw distance2 return from the instrument is: ", s)
-    data_extract = s[6:14]
     print ("The extracted distance2 data is: ", data_extract)
     print ("The converted distance2 float is: ", convert(data_extract))
-    print ("The int converted distance2 float is: ", int_convert(data_extract))
+    print ("The int converted distance2 data is: ", int_convert(data_extract))
     ser.close
 
+print ('--------------------------------------------------')
 try:
   poll_distance()
 except:
   print ("Distance1 errored out")
   daijin_distance1 = -1
+print ('--------------------------------------------------')
 try:
   poll_distance2()
 except:
   print ("Distance2 errored out")
   daijin_distance2 = -1
+print ('--------------------------------------------------')
 try:
   poll_level()
 except:
   daijin_level1 = -1
   print ("Level1 errored out")
+print ('--------------------------------------------------')
 try:
   poll_level2()
 except:
